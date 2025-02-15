@@ -15,7 +15,14 @@ final class TodoError extends TodoState {
 
 final class TodoList extends TodoState {
   final List<TodoModel> items;
+  final List<int> selectedItems;
 
-  TodoList(this.items);
+  TodoList(this.items, {this.selectedItems = const []});
+
+  TodoList copyWith({List<TodoModel>? items, List<int>? selectedItems}) {
+    return TodoList(
+      items ?? this.items,
+      selectedItems: selectedItems ?? this.selectedItems,
+    );
+  }
 }
-

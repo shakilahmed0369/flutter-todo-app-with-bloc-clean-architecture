@@ -39,12 +39,25 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
 
     on<UpdateTodo>((event, emit) {
       if (state is TodoList) {
-        final List<TodoModel> items = List.from((state as TodoList).items);
-        final currentTodo = items[event.todoIndex];
-        final TodoModel updatedTodo =
-            currentTodo.copyWith(completed: !currentTodo.completed);
-        items[event.todoIndex] = updatedTodo;
-        emit(TodoList(items));
+        final todoList = (state as TodoList);
+        final List<TodoModel> items = List.from(todoList.items);
+        final List<int> selectedItems = List.from(todoList.selectedItems);
+
+        if (todoList.selectedItems.isEmpty) {
+          final currentTodo = items[event.todoIndex];
+          final TodoModel updatedTodo =
+              currentTodo.copyWith(completed: !currentTodo.completed);
+          items[event.todoIndex] = updatedTodo;
+          emit(TodoList(items));
+        } else {
+          if (selectedItems.contains(event.todoIndex)) {
+            selectedItems.remove(event.todoIndex);
+          } else {
+            selectedItems.add(event.todoIndex);
+          }
+
+          emit(todoList.copyWith(selectedItems: selectedItems));
+        }
       }
     });
 
@@ -59,6 +72,35 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         'dueDate': '1-1-25'
       });
       emit(TodoList([...items, todo]));
+    });
+
+    on<SelectTodo>((event, emit) {
+      if (state is TodoList) {
+        final todoList = (state as TodoList);
+        final List<int> selectedItems = List.from(todoList.selectedItems);
+
+        if (selectedItems.contains(event.item)) {
+          selectedItems.remove(event.item);
+        } else {
+          selectedItems.add(event.item);
+        }
+
+        emit(todoList.copyWith(selectedItems: selectedItems));
+      }
+    });
+
+    on<DeleteSelectedTodos>((event, emit) {
+      if (state is TodoList) {
+        final todoList = (state as TodoList);
+
+        final newItems = todoList.items
+            .asMap()
+            .entries
+            .where((entry) => !todoList.selectedItems.contains(entry.key))
+            .map((entry) => entry.value)
+            .toList();
+        emit(todoList.copyWith(items: newItems, selectedItems: []));
+      }
     });
   }
 }

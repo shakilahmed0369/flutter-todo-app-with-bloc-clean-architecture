@@ -16,5 +16,11 @@ final class SaveTodo extends TodoEvent {
   final String description;
 
   SaveTodo({required this.title, required this.description});
-  
 }
+
+final class SelectTodo extends TodoEvent {
+  final int item;
+  SelectTodo(this.item);
+}
+
+final class DeleteSelectedTodos extends TodoEvent {}
